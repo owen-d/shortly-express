@@ -2,6 +2,7 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
+var bcrypt = require('bcrypt-nodejs');
 
 
 var db = require('./app/config');
@@ -22,6 +23,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
+//-------Session support----//
+var session = require('express-session');
+
+app.use(session({
+  secret: 'keyboard catz',
+  resave: false,
+  saveUninitialized: true
+}));
+
+app.get('/test', util.checkUser, function(req, res){
+  res.send(req.session);
+});
 
 app.get('/', 
 function(req, res) {
@@ -77,6 +90,41 @@ function(req, res) {
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+app.get('/login', function(req, res){
+  res.render('login');  
+});
+
+app.post('/login',function(req, res){
+
+});
+
+app.get('/signup', function(req, res){
+  res.render('signup');
+});
+
+app.post('/signup', function(req, res){
+  //get data from form
+  var userName = req.body.username;
+  var password = req.body.password;
+  //check if name is available.
+  new User({userName: userName}).fetch().then(function(user){
+    if (!user) {
+      bcrypt.hash(password, null, null, function(err, hash){
+        Users.create({userName: userName, hashPass: hash})
+        .then(function(user){
+          util.createSession(req, res, user);
+        });
+      });
+    } else {
+      console.log('usrname already exists');
+      res.redirect('/signup');
+    }
+  });
+});
+
+
+
+
 
 
 
