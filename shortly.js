@@ -95,7 +95,22 @@ app.get('/login', function(req, res){
 });
 
 app.post('/login',function(req, res){
-
+  var userName = req.body.username;
+  var password = req.body.password;
+  new User({userName: userName}).fetch().then(function(user){
+    if (user) {
+      bcrypt.compare(password, user.attributes.hashPass, function(err, match){
+        if (match) {
+          util.createSession(req, res, user);
+        } else {
+          console.log('invalid username/pw');
+          res.redirect('/login');
+        }
+      });
+    } else {
+      res.redirect('/login');
+    }
+  });
 });
 
 app.get('/signup', function(req, res){
