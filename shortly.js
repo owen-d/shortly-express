@@ -32,28 +32,24 @@ app.use(session({
   saveUninitialized: true
 }));
 
-app.get('/test', util.checkUser, function(req, res){
-  res.send(req.session);
-});
-
-app.get('/', 
+app.get('/', util.checkUser, 
 function(req, res) {
   res.render('index');
 });
 
-app.get('/create', 
+app.get('/create', util.checkUser,
 function(req, res) {
   res.render('index');
 });
 
-app.get('/links', 
+app.get('/links', util.checkUser, 
 function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
   });
 });
 
-app.post('/links', 
+app.post('/links', util.checkUser,
 function(req, res) {
   var uri = req.body.url;
 
